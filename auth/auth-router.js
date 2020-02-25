@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
+const authorize = require('./authenticate-middleware.js');
 const jwt = require("jsonwebtoken");
 const secrets = require("../config/secrets");
 
@@ -24,7 +25,7 @@ router.post('/register', (req, res) => {
 
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', authorize, (req, res) => {
   // implement login
 
   let { username, password } = req.body;

@@ -3,36 +3,34 @@
   before granting access to the next middleware/route handler
 */
 
-
-const users = require("../users/users-model.js");
-const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const secrets = require("../config/secrets.js");
 
 
 module.exports = (req, res, next) => {
   res.status(401).json({ you: 'shall not pass!' });
 
-  const { username, password } = req.headers;
+  const token = req.headers.authorization;
 
   // validate that they exist ... we didn't have this part in class...
-  if (!(username && password)) {
-    res.status(401).json({ message: "invalid credentials" });
+  if (req.decodedJwt) {
+    next();
+
+  } else if (token) {
+
+    jwt.verify(token, secrets.jwtSecret, (err, decodedJwt) => {
+      // if the token doesn't verify
+      if (err) {
+        res.status(401).json({ you: "shall not pass!" });
+        // if it DOES...
+      } else {
+        req.decodedJwt = decodedJwt;
+        next();
+      }
+    });
   } else {
+    res.status(401).json({ you: "can't touch that." });
 
-    users
-      .findBy({ username })
-      .first()
-      .then(_user => {
-        if (_user && bcrypt.compareSync(password, _user.password)) {
-          next();
-        } else {
-          res.status(401).json({ messege: "Invalid Credentials" });
-        }
-      })
-
-      .catch(err => {
-        res.status(500).json({ messege: err });
-      });
   }
-
 
 };

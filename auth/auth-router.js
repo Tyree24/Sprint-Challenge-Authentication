@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 
 const Users = require('../users/users-model.js');
 
+const authorize = require('./authenticate-middleware.js');
+
 router.post('/register', (req, res) => {
   // implement registration
 
@@ -19,7 +21,7 @@ router.post('/register', (req, res) => {
 
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', authorize, (req, res) => {
   // implement login
 
   let { username } = req.headers;
